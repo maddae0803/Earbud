@@ -16,9 +16,29 @@ public class Menu extends JFrame {
             new IntervalRecognition();
             setVisible(false);
         });
+
         JMenuItem pitchRec = new JMenuItem("Pitch Recognition");
+        pitchRec.addActionListener((ActionEvent e) -> {
+            new PitchRecognition();
+            setVisible(false);
+        });
+
+        JMenuItem chordRec = new JMenuItem("Chord Recognition");
+        chordRec.addActionListener((ActionEvent e) -> {
+            new ChordRecognition();
+            setVisible(false);
+        });
+
+        JMenuItem scaleRec = new JMenuItem("Scale Recognition");
+        scaleRec.addActionListener((ActionEvent e) -> {
+            new ScaleRecognition();
+            setVisible(false);
+        });
+
         newMI.add(intRec);
         newMI.add(pitchRec);
+        newMI.add(chordRec);
+        newMI.add(scaleRec);
 
         JMenuItem openMI = new JMenuItem("Open");
         JMenuItem saveMI = new JMenuItem("Save");

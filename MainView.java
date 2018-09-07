@@ -9,7 +9,7 @@ import java.net.*;
 public class MainView extends Menu implements ActionListener{
 	private BufferedImage img;
 	public MainView() {
-		setTitle("MainView");
+		setTitle("Welcome to EarBud!");
 		setSize(700, 400);
 		//setBackground(Color.RED);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

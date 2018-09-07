@@ -8,28 +8,30 @@ import jm.music.data.*;
 import java.util.*;
 
 
-public class IntervalRecognition extends Menu implements ActionListener{
-	public static final String defaultMessage = "Game Instructions: \n     \u2022 Listen to the played interval.\n     \u2022 From the four choices shown, choose the correct interval, and press 'Select' to lock in your choice.\n     \u2022 Press the 'Replay' button if you wish to have the interval played again. \n     \u2022 If you choose the correct answer on the 1st try, you will receive five (5) points; if you choose the correct answer on the 2nd try, you will receive three (3) points; if you choose the correct answer on the 3rd try, you will receive (1) point; if you choose the correct answer on the 4th try, you will lose one (1) point. \n     \u2022 The game will be over when you reach a total of 50 or more points.\n     \u2022 Good Luck, and Have Fun!";
+public class ScaleRecognition extends Menu implements ActionListener{
+	public static final String defaultMessage = "Game Instructions: \n     \u2022 Listen to the played scale.\n     \u2022 From the four choices shown, choose the correct interval, and press 'Select' to lock in your choice.\n     \u2022 Press the 'Replay' button if you wish to have the interval played again. \n     \u2022 If you choose the correct answer on the 1st try, you will receive five (5) points; if you choose the correct answer on the 2nd try, you will receive three (3) points; if you choose the correct answer on the 3rd try, you will receive (1) point; if you choose the correct answer on the 4th try, you will lose one (1) point. \n     \u2022 The game will be over when you reach a total of 50 or more points.\n     \u2022 Good Luck, and Have Fun!";
 	public int accum; 
 	ButtonGroup group;
 	JRadioButton choiceA, choiceB, choiceC, choiceD;
 	String correct; 
-	Phrase interval;
+	Phrase scale;
 	JTextPane tPane;
 	JScrollPane sPane;
 	JTextField response; 
 	JLabel points; 
 	int pVal; //point value for each question
 	String difficulty; 
+	int [][] possibilities; 
+	ArrayList<String> choices; 
 	
-	public IntervalRecognition() {
-		setTitle("Interval Recognition");
+	public ScaleRecognition() {
+		setTitle("Scale Recognition");
 		setSize(700, 400);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel panel = new JPanel();
 		createMenuBar();
 		panel.setLayout(new GridLayout(0, 1));
-		Color backColor = new Color(229, 204, 255);
+		Color backColor = new Color(255, 235, 204);
 		panel.setBackground(backColor);
 		
 		
@@ -67,7 +69,7 @@ public class IntervalRecognition extends Menu implements ActionListener{
 		JButton replay = new JButton("Replay");
 		replay.setSize(100, 40);
 		replay.addActionListener((ActionEvent e) -> {
-			Play.midi(interval);
+			Play.midi(scale);
 		});
 		choose.setSize(60, 40);
 		choose.addActionListener(this);
@@ -115,16 +117,21 @@ public class IntervalRecognition extends Menu implements ActionListener{
 		tPane.setText(defaultMessage);
 		tPane.setCaretPosition(0);
 		pVal = 5; 
-		interval = new Phrase();
-		ArrayList<String> choices; 
-		ArrayList<String> e_choices = new ArrayList<String>(Arrays.asList("Unison", "Minor 2nd", "Major 2nd", "Minor 3rd", "Major 3rd", "Perfect 4th", "Tritone", "Perfect 5th"));
+		scale = new Phrase();
+		ArrayList<String> e_choices = new ArrayList<String>(Arrays.asList("Major Scale (Ionian)", "Natural Minor Scale (Aeolian)", "Harmonic Minor Scale", "Melodic Minor Scale"));
 		ArrayList<String> m_choices = new ArrayList<String>(Arrays.asList("Unison", "Minor 2nd", "Major 2nd", "Minor 3rd", "Major 3rd", "Perfect 4th", "Tritone", "Perfect 5th", "Minor 6th", "Major 6th", "Minor 7th", "Major 7th", "Octave"));
 		ArrayList<String> h_choices = new ArrayList<String>(Arrays.asList("Unison", "Minor 2nd", "Major 2nd", "Minor 3rd", "Major 3rd", "Perfect 4th", "Tritone", "Perfect 5th", "Minor 6th", "Major 6th", "Minor 7th", "Major 7th", "Octave", "Minor 9th", "Major 9th", "Minor 10th", "Major 10th", "Perfect 11th", "Augmented 11th", "Perfect 12th"));
 		ArrayList<JRadioButton> answers = new ArrayList<JRadioButton>(Arrays.asList(choiceA, choiceB, choiceC, choiceD));
 		for (int i = 0; i < answers.size(); i++) {
 			answers.get(i).setSelected(false);
 		}
-		int pos = randomInterval();
+		possibilities = new int[][] {
+				{ 2, 2, 1, 2, 2, 2, 1, -1, -2, -2, -2, -1, -2, -2}, 
+  				{ 2, 1, 2, 2, 1, 2, 2, -2, -2, -1, -2, -2, -1, -2},
+  				{ 2, 1, 2, 2, 1, 3, 1, -1, -3, -1, -2, -2, -1, -2},				
+  				{ 2, 1, 2, 2, 2, 2, 1, -2, -2, -1, -2, -2, -1, -2},		
+			};
+		int pos = randomScale();
 		switch (level) {
 			case "Easy":
 				choices = e_choices;
@@ -156,34 +163,20 @@ public class IntervalRecognition extends Menu implements ActionListener{
 			a.remove(aPos);
 		}
 	}
-	private int randomInterval() {
-		int multiplier;
-		int [] posneg = {-1, 1};
-		switch (level) {
-			case "Easy":
-				multiplier = 8;
-				break;
-			case "Medium":
-				multiplier = 12;
-				break;
-			case "Difficult":
-				multiplier = 20 * posneg[(int) (Math.random() * 2)];
-				break;
-			default: multiplier = 1;
-				break;
-		}
+	private int randomScale() {
 		Note n = new Note();
-		//Phrase phr = new Phrase();
 		int pitch = (int) (Math.random() * 30) + 48;
 		n.setPitch(pitch);
-		interval.addNote(n);
-		int pitchVal = n.getPitch();
-		pitchVal += (int) (Math.random() * multiplier);
-		Note n2 = new Note();
-		n2.setPitch(pitchVal);
-		interval.addNote(n2);
-		Play.midi(interval);
-		return Math.abs(pitchVal - pitch);
+		scale.addNote(n);
+		int scaleChoice = (int) (Math.random() * 4);
+		for (int i = 0; i < possibilities[scaleChoice].length; i++) {
+			pitch += possibilities[scaleChoice][i];
+			Note n2 = new Note();
+			n2.setPitch(pitch);
+			scale.addNote(n2);
+		}
+		Play.midi(scale);
+		return scaleChoice;
 	}
 	/*
 	private void changePane(String s) {

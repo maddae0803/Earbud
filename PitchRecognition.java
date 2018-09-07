@@ -8,29 +8,33 @@ import jm.music.data.*;
 import java.util.*;
 
 
-public class IntervalRecognition extends Menu implements ActionListener{
-	public static final String defaultMessage = "Game Instructions: \n     \u2022 Listen to the played interval.\n     \u2022 From the four choices shown, choose the correct interval, and press 'Select' to lock in your choice.\n     \u2022 Press the 'Replay' button if you wish to have the interval played again. \n     \u2022 If you choose the correct answer on the 1st try, you will receive five (5) points; if you choose the correct answer on the 2nd try, you will receive three (3) points; if you choose the correct answer on the 3rd try, you will receive (1) point; if you choose the correct answer on the 4th try, you will lose one (1) point. \n     \u2022 The game will be over when you reach a total of 50 or more points.\n     \u2022 Good Luck, and Have Fun!";
+public class PitchRecognition extends Menu implements ActionListener{
+	public static final String defaultMessage = "Game Instructions: \n     \u2022 Listen to the note being played\n     \u2022 From the four choices shown, choose the correct note name, and press 'Select' to lock in your choice.\n     \u2022 Press the 'Replay' button if you wish to have the note played again. \n     \u2022 If you choose the correct answer on the 1st try, you will receive five (5) points; if you choose the correct answer on the 2nd try, you will receive three (3) points; if you choose the correct answer on the 3rd try, you will receive (1) point; if you choose the correct answer on the 4th try, you will lose one (1) point. \n     \u2022 The game will be over when you reach a total of 50 or more points.\n     \u2022 Good Luck, and Have Fun!";
 	public int accum; 
 	ButtonGroup group;
 	JRadioButton choiceA, choiceB, choiceC, choiceD;
 	String correct; 
-	Phrase interval;
+	Note n;
 	JTextPane tPane;
 	JScrollPane sPane;
 	JTextField response; 
 	JLabel points; 
 	int pVal; //point value for each question
-	String difficulty; 
+	String difficulty = "Easy"; 
+	ArrayList<String> notes;
 	
-	public IntervalRecognition() {
-		setTitle("Interval Recognition");
+	public PitchRecognition() {
+		setTitle("Pitch Recognition");
 		setSize(700, 400);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel panel = new JPanel();
 		createMenuBar();
 		panel.setLayout(new GridLayout(0, 1));
-		Color backColor = new Color(229, 204, 255);
-		panel.setBackground(backColor);
+		panel.setOpaque(true);
+		Color teal = new Color(204, 255, 220);
+		panel.setBackground(teal);
+
+	
 		
 		
 		tPane = new JTextPane();
@@ -67,7 +71,7 @@ public class IntervalRecognition extends Menu implements ActionListener{
 		JButton replay = new JButton("Replay");
 		replay.setSize(100, 40);
 		replay.addActionListener((ActionEvent e) -> {
-			Play.midi(interval);
+			Play.midi(n);
 		});
 		choose.setSize(60, 40);
 		choose.addActionListener(this);
@@ -83,7 +87,13 @@ public class IntervalRecognition extends Menu implements ActionListener{
 		panel.add(choiceD);
 		
 		JPanel buttonPanel = new JPanel();
+		buttonPanel.setOpaque(true);
+		buttonPanel.setBackground(teal);
+
 		JPanel labelPanel = new JPanel();
+		labelPanel.setOpaque(true);
+		labelPanel.setBackground(teal);
+
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
 		
@@ -94,11 +104,9 @@ public class IntervalRecognition extends Menu implements ActionListener{
 		labelPanel.add(Box.createRigidArea(new Dimension (0, 15)));
 		labelPanel.add(response);
 		labelPanel.setBorder(new EmptyBorder(new Insets(10, 110, 50, 10)));
-		labelPanel.setBackground(backColor);
 		
 		buttonPanel.add(choose);
 		buttonPanel.add(replay);
-		buttonPanel.setBackground(backColor);
 		
 		add(panel, BorderLayout.LINE_START);
 		add(buttonPanel, BorderLayout.SOUTH);
@@ -108,109 +116,64 @@ public class IntervalRecognition extends Menu implements ActionListener{
 		setVisible(true);
 		
 		
+		}	
+		public void createGame() {
+			points.setText("Points: " + accum);
+			tPane.setText(defaultMessage);
+			tPane.setCaretPosition(0);
+			pVal = 5; 
+			notes = new ArrayList<String>(Arrays.asList("C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab", "A", "A#/Bb", "B"));
+
 			
-	}
-	public void createGame() {
-		points.setText("Points: " + accum);
-		tPane.setText(defaultMessage);
-		tPane.setCaretPosition(0);
-		pVal = 5; 
-		interval = new Phrase();
-		ArrayList<String> choices; 
-		ArrayList<String> e_choices = new ArrayList<String>(Arrays.asList("Unison", "Minor 2nd", "Major 2nd", "Minor 3rd", "Major 3rd", "Perfect 4th", "Tritone", "Perfect 5th"));
-		ArrayList<String> m_choices = new ArrayList<String>(Arrays.asList("Unison", "Minor 2nd", "Major 2nd", "Minor 3rd", "Major 3rd", "Perfect 4th", "Tritone", "Perfect 5th", "Minor 6th", "Major 6th", "Minor 7th", "Major 7th", "Octave"));
-		ArrayList<String> h_choices = new ArrayList<String>(Arrays.asList("Unison", "Minor 2nd", "Major 2nd", "Minor 3rd", "Major 3rd", "Perfect 4th", "Tritone", "Perfect 5th", "Minor 6th", "Major 6th", "Minor 7th", "Major 7th", "Octave", "Minor 9th", "Major 9th", "Minor 10th", "Major 10th", "Perfect 11th", "Augmented 11th", "Perfect 12th"));
-		ArrayList<JRadioButton> answers = new ArrayList<JRadioButton>(Arrays.asList(choiceA, choiceB, choiceC, choiceD));
-		for (int i = 0; i < answers.size(); i++) {
-			answers.get(i).setSelected(false);
-		}
-		int pos = randomInterval();
-		switch (level) {
-			case "Easy":
-				choices = e_choices;
-				break;
-			case "Medium":
-				choices = m_choices;
-				break;
-			case "Difficult":
-				choices = h_choices;
-				break;
-			default: choices = e_choices;
-				break;
-		}		
-		randomizeChoices(choices, answers, pos);
-	}
-	private void randomizeChoices(ArrayList<String> c, ArrayList<JRadioButton> a, int p) {
-		int aPos = (int) (Math.random() * 4);
-		JRadioButton correctAnswer = a.get(aPos);
-		correct = correctAnswer.getActionCommand();
-		correctAnswer.setText(c.get(p));
-		c.remove(p);
-		a.remove(aPos);
+			ArrayList<JRadioButton> answers = new ArrayList<JRadioButton>(Arrays.asList(choiceA, choiceB, choiceC, choiceD));
+			for (int i = 0; i < answers.size(); i++) {
+				answers.get(i).setSelected(false);
+			}
 
-		while (a.size() > 0) {
-			aPos = (int) (Math.random() * a.size());
-			int cPos = (int) (Math.random() * c.size());
-			a.get(aPos).setText(c.get(cPos));
-			c.remove(cPos);
+			int chosen = randomPitch();
+			randomizeChoices(notes, answers, chosen);
+
+		}
+
+		private void randomizeChoices(ArrayList<String> n, ArrayList<JRadioButton> a, int c) {
+			int aPos = (int) (Math.random() * 4);
+			JRadioButton correctAnswer = a.get(aPos);
+			correct = correctAnswer.getActionCommand();
+			correctAnswer.setText(n.get(c));
+			n.remove(c);
 			a.remove(aPos);
-		}
-	}
-	private int randomInterval() {
-		int multiplier;
-		int [] posneg = {-1, 1};
-		switch (level) {
-			case "Easy":
-				multiplier = 8;
-				break;
-			case "Medium":
-				multiplier = 12;
-				break;
-			case "Difficult":
-				multiplier = 20 * posneg[(int) (Math.random() * 2)];
-				break;
-			default: multiplier = 1;
-				break;
-		}
-		Note n = new Note();
-		//Phrase phr = new Phrase();
-		int pitch = (int) (Math.random() * 30) + 48;
-		n.setPitch(pitch);
-		interval.addNote(n);
-		int pitchVal = n.getPitch();
-		pitchVal += (int) (Math.random() * multiplier);
-		Note n2 = new Note();
-		n2.setPitch(pitchVal);
-		interval.addNote(n2);
-		Play.midi(interval);
-		return Math.abs(pitchVal - pitch);
-	}
-	/*
-	private void changePane(String s) {
-		if (s.equals("correct")) {
-			response.setText("Correct! Nice Work!     \u2713");
-		}
-		else {
-			response.setText("Try Again.");
-		}
 
-	}*/
-
-	public void actionPerformed(ActionEvent e) {
-		if (group.getSelection().getActionCommand().equals(correct) == true) {
-			response.setText("Correct! Nice Work!     \u2713");
-			accum += pVal; 
-			group.getSelection().setSelected(false);
-			try {
-				Thread.sleep(300);
-			if (accum >= 50) {
-				points.setText("Points: " + accum);
-				response.setText("Game Over: Congratulations!");
-			}
-			else {
-				createGame();
+			while (a.size() > 0) {
+				aPos = (int) (Math.random() * a.size());
+				int cPos = (int) (Math.random() * n.size());
+				a.get(aPos).setText(n.get(cPos));
+				n.remove(cPos);
+				a.remove(aPos);
 			}
 		}
+
+		private int randomPitch() {
+			n = new Note();
+			int pitch = (int) (Math.random() * 40) + 30;
+			n.setPitch(pitch);
+			Play.midi(n);
+			return pitch % 12; 
+		}
+		public void actionPerformed(ActionEvent e) {
+			if (group.getSelection().getActionCommand().equals(correct) == true) {
+				response.setText("Correct! Nice Work!     \u2713");
+				accum += pVal; 
+				group.getSelection().setSelected(false);
+				try {
+					Thread.sleep(300);
+				if (accum >= 50) {
+					points.setText("Points: " + accum);
+					response.setText("Game Over: Congratulations!");
+				}
+				else {
+					createGame();
+				}
+			}
 			catch (InterruptedException ex) {
 			}
 		}
@@ -218,22 +181,22 @@ public class IntervalRecognition extends Menu implements ActionListener{
 				response.setText("Try Again.");
 				pVal -= 2;
 			}
+
+
 		}
 
-
-    protected void createMenuBar() {
+		protected void createMenuBar() {
         JMenuBar menubar = new JMenuBar();
         JMenu file = new JMenu("File");
         file.setMnemonic(KeyEvent.VK_F);
         JMenuItem newMI = new JMenuItem("New Game");
         JMenuItem openMI = new JMenuItem("Open");
         JMenuItem saveMI = new JMenuItem("Save");
-
-
         JMenuItem eMenuItem = new JMenuItem("Exit");
+
         newMI.setMnemonic(KeyEvent.VK_N);
         newMI.addActionListener((ActionEvent e) -> {
-        	new IntervalRecognition();
+        	new PitchRecognition();
         	setVisible(false);
         });
         eMenuItem.setMnemonic(KeyEvent.VK_E);
@@ -250,7 +213,7 @@ public class IntervalRecognition extends Menu implements ActionListener{
         diff.add(easy);
         easy.addItemListener((ItemEvent e) -> {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    level = "Easy";
+                    difficulty= "Easy";
                     easy.setSelected(true);
                     accum = 0;
                     response.setText("");
@@ -263,7 +226,7 @@ public class IntervalRecognition extends Menu implements ActionListener{
         diff.add(med);
         med.addItemListener((ItemEvent e) -> {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    level = "Medium";
+                    difficulty = "Medium";
                     med.setSelected(true);
                     accum = 0;
                     response.setText("");
@@ -275,7 +238,7 @@ public class IntervalRecognition extends Menu implements ActionListener{
         diff.add(diffic);
         diffic.addItemListener((ItemEvent e) -> {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    level = "Difficult";
+                    difficulty = "Difficult";
                     diffic.setSelected(true);
                     accum = 0;
                     response.setText("");
@@ -307,6 +270,4 @@ public class IntervalRecognition extends Menu implements ActionListener{
         menubar.add(help);
         setJMenuBar(menubar);
 }
-
-
-}
+	}
